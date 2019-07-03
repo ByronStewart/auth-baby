@@ -1,4 +1,3 @@
-import Sequelize from "sequelize";
 import sirv from "sirv";
 import express from "express";
 import compression from "compression";
@@ -6,7 +5,7 @@ import * as sapper from "@sapper/server";
 import session from "express-session";
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
-
+import bcrypt from "bcrypt";
 import User from "./models/Users.js";
 
 const { PORT, NODE_ENV } = process.env;
@@ -23,7 +22,8 @@ passport.use(
         return done(null, false);
       } else {
         const storedUser = dbres.dataValues;
-        if (username === storedUser.username && password === storedUser.password) {
+        const pwdMatch = await bcrypt.compare(password, storedUser.password);
+        if (pwdMatch) {
           return done(null, { username });
         } else {
           return done(null, false);
@@ -37,22 +37,17 @@ passport.use(
   })
 );
 
+const bcryptOpt = {
+  saltRounds: 10
+};
+
 const sessionOptions = {
   secret: "secret",
   resave: true,
   saveUninitialized: false
 };
 
-/* const db = new Sequelize({
-  dialect: "sqlite",
-  storage: "./src/database.sqlite"
-});
-
-db.authenticate()
-  .then(() => console.log("database connected"))
-  .catch((err) => console.log("error", err)); */
-
-const app = express(); // You can also use Express
+const app = express();
 
 app.use(express.urlencoded());
 app.use(session(sessionOptions));
@@ -75,13 +70,27 @@ app.post(
     failureRedirect: "/about"
   })
 );
+app.post("/api/register", async (req, res) => {
+  const { username, password } = req.body;
+  try {
+    const notUnique = await User.findOne({ where: { username } });
+    if (!notUnique) {
+      const hash = await bcrypt.hash(password, bcryptOpt.saltRounds);
+      await User.create({ username, password: hash });
+      res.redirect("/login");
+    } else {
+      // this response is for when the username is taken
+      res.redirect("/login");
+    }
+  } catch (err) {
+    console.log(err);
+    res.send("something went wrong", err);
+  }
+});
+
 app.get("/api/logout", (req, res) => {
   req.logout();
   res.redirect("/");
-});
-app.get("/api/database", (req, res) => {
-  User.findAll().then((users) => console.log(JSON.stringify(users)));
-  res.send("hello");
 });
 
 app.use(

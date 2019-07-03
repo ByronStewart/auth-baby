@@ -60,6 +60,11 @@
       <a class={segment === 'login' ? 'selected' : ''} href="login">login</a>
     </li>
     <li>
+      <a class={segment === 'register' ? 'selected' : ''} href="register">
+        register
+      </a>
+    </li>
+    <li>
       <a class={segment === 'secret' ? 'selected' : ''} href="secret">secret</a>
     </li>
     <li>

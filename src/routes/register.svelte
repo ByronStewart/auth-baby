@@ -1,5 +1,5 @@
-<h1>This is the login page</h1>
-<form action="/api/login" method="POST">
+<h1>This is the registration page</h1>
+<form action="/api/register" method="POST">
   <label for="username">
     Username:
     <input type="text" name="username" id="username" />
