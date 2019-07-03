@@ -4,15 +4,14 @@
     if (user == undefined) {
       this.error(500, "you are not allowed in here");
     } else {
-      return user;
+      return { user };
     }
   }
 </script>
 
 <script>
   export let user;
-  $: console.log(user);
 </script>
 
 <h1>This is supposed to be secret</h1>
-<p>{user} you are one of the special ones</p>
+<p>{user.username} you are one of the special ones</p>
