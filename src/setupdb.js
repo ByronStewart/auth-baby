@@ -7,12 +7,6 @@ const db = new Sequelize({
   storage: "./src/database.sqlite"
 });
 
-db.authenticate()
-  .then(() => {
-    console.log("success");
-  })
-  .catch((err) => console.log("error"));
-
 class User extends Sequelize.Model {}
 User.init(
   {
@@ -30,9 +24,7 @@ User.init(
     modelName: "User"
   }
 );
-User.sync({ force: true }).then(() => {
-  return User.create({
-    username: "Byron",
-    password: "12345678"
-  });
-});
+
+db.sync({ force: true })
+  .then(() => console.log("done"))
+  .catch((err) => console.log(err));

@@ -7,6 +7,7 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import bcrypt from "bcrypt";
 import User from "./models/Users.js";
+const SQLiteStore = require("connect-sqlite3")(session);
 
 const { PORT, NODE_ENV } = process.env;
 const dev = NODE_ENV === "development";
@@ -42,14 +43,18 @@ const bcryptOpt = {
 };
 
 const sessionOptions = {
+  store: new SQLiteStore(),
   secret: "secret",
-  resave: true,
-  saveUninitialized: false
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    maxAge: 1000 * 60 * 1
+  }
 };
 
 const app = express();
 
-app.use(express.urlencoded());
+app.use(express.urlencoded({ extended: false }));
 app.use(session(sessionOptions));
 app.use(compression({ threshold: 0 }));
 app.use(sirv("static", { dev }));
